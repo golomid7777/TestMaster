@@ -1,0 +1,46 @@
+﻿from fastapi import FastAPI
+
+from services.router import router as services_router
+from questions.router import router as questions_router
+from users.router import router as users_router
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app = FastAPI(
+    title="TestMaster API"
+)
+
+
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(
+    services_router
+)
+
+app.include_router(
+    questions_router
+)
+
+app.include_router(
+    users_router
+)
+
+
+@app.get("/")
+def home():
+
+    return {
+        "status": "ok",
+        "app": "TestMaster"
+    }
