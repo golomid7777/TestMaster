@@ -18,14 +18,18 @@ createRoot(
 
 );
 
-if ("serviceWorker" in navigator) {
-
+if (
+    "serviceWorker" in navigator &&
+    location.hostname !== "127.0.0.1" &&
+    location.hostname !== "localhost"
+) {
     window.addEventListener("load", () => {
-
         navigator.serviceWorker
             .register("/sw.js")
             .then(() => {
-                console.log("TestMaster Service Worker зарегистрирован");
+                console.log(
+                    "TestMaster Service Worker зарегистрирован"
+                );
             })
             .catch((error) => {
                 console.error(
@@ -33,7 +37,5 @@ if ("serviceWorker" in navigator) {
                     error
                 );
             });
-
     });
-
 }

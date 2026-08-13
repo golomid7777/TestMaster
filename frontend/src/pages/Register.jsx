@@ -77,14 +77,9 @@ function Register() {
 
         <div className="container">
 
-            <h1>
-                TestMaster
-            </h1>
-
-
-            <h2>
-                Регистрация
-            </h2>
+            <div className="form-eyebrow">Новый аккаунт</div>
+            <h2>Регистрация</h2>
+            <p className="form-subtitle">Заполните данные и выберите службу</p>
 
 
             <form
@@ -92,6 +87,7 @@ function Register() {
                 onSubmit={submit}
             >
 
+                <label className="field-label">Имя</label>
                 <input
                     name="name"
                     placeholder="Имя"
@@ -99,6 +95,7 @@ function Register() {
                 />
 
 
+                <label className="field-label">Email</label>
                 <input
                     name="email"
                     placeholder="Email"
@@ -106,6 +103,7 @@ function Register() {
                 />
 
 
+                <label className="field-label">Пароль</label>
                 <input
                     name="password"
                     type="password"
@@ -114,6 +112,7 @@ function Register() {
                 />
 
 
+                <label className="field-label">Служба</label>
                 <select
                     name="service_id"
                     onChange={change}
@@ -138,7 +137,7 @@ function Register() {
                 </select>
 
 
-                <button>
+                <button className="btn-primary btn-block">
                     Создать аккаунт
                 </button>
 

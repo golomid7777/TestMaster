@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+backend/.venv/
+.venv/
+
+# Environment secrets
+backend/.env
+.env
+
+# Local databases and backups
+backend/app/*.db
+backend/app/database/*.db
+backend/app/database/*backup*.db
+
+# Local test scripts
+backend/test_email.py
+
+# Build / dependencies
+frontend/node_modules/
+frontend/dist/

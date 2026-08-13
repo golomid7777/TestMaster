@@ -4,6 +4,7 @@ from services.router import router as services_router
 from questions.router import router as questions_router
 from users.router import router as users_router
 from fastapi.middleware.cors import CORSMiddleware
+from admin.router import router as admin_router
 
 
 app = FastAPI(
@@ -44,3 +45,5 @@ def home():
         "status": "ok",
         "app": "TestMaster"
     }
+
+app.include_router(admin_router)
