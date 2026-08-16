@@ -11,7 +11,7 @@ function Home() {
     const [answer, setAnswer] = useState("");
     const [selectedQuestion, setSelectedQuestion] = useState("");
     const [error, setError] = useState("");
-
+    const [paymentReturn, setPaymentReturn] = useState(false);
     const [topics, setTopics] = useState([]);
 
     const [selectedTopicId, setSelectedTopicId] = useState("");
@@ -157,7 +157,32 @@ function Home() {
         }
 
 
+        const params = new URLSearchParams(window.location.search);
+        const returnedFromPayment =
+            params.get("payment") === "return";
+
         loadTopics();
+
+        if (returnedFromPayment) {
+
+            setPaymentReturn(true);
+
+            const retry1 = setTimeout(loadTopics, 1500);
+            const retry2 = setTimeout(loadTopics, 3000);
+            const retry3 = setTimeout(loadTopics, 5000);
+
+            window.history.replaceState(
+                {},
+                "",
+                window.location.pathname
+            );
+
+            return () => {
+                clearTimeout(retry1);
+                clearTimeout(retry2);
+                clearTimeout(retry3);
+            };
+        }
 
     }, [isAdmin]);
 
