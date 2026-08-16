@@ -309,6 +309,14 @@ class TopicAccess(Base):
         index=True
     )
 
+    payment_id = Column(
+        Integer,
+        ForeignKey("payments.id"),
+        nullable=True,
+        unique=True,
+        index=True
+    )
+
     granted_at = Column(
         DateTime,
         nullable=False,
