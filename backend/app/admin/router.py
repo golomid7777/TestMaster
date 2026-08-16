@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 
 from database.db import SessionLocal
-from database.models import Topic, Service, User, Question, TopicAccess
+from database.models import Topic, Service, User, Question, TopicAccess, Payment
 from security import decode_token
 
 from fastapi import UploadFile, File
@@ -453,6 +453,77 @@ def get_users(
     finally:
         db.close()
 
+@router.get("/payments")
+def get_payments(
+    admin=Depends(require_admin)
+):
+    db = SessionLocal()
+
+    try:
+        rows = (
+            db.query(
+                Payment,
+                User,
+                Topic
+            )
+            .join(
+                User,
+                Payment.user_id == User.id
+            )
+            .join(
+                Topic,
+                Payment.topic_id == Topic.id
+            )
+            .order_by(
+                Payment.id.desc()
+            )
+            .all()
+        )
+
+        result = []
+
+        for payment, user, topic in rows:
+
+            access = (
+                db.query(TopicAccess)
+                .filter(
+                    TopicAccess.payment_id == payment.id
+                )
+                .first()
+            )
+
+            result.append({
+                "id": payment.id,
+                "user_id": user.id,
+                "user_name": user.name,
+                "user_email": user.email,
+                "topic_id": topic.id,
+                "topic_name": topic.name,
+                "amount_kopecks": payment.amount_kopecks,
+                "access_minutes": payment.access_minutes,
+                "status": payment.status,
+                "yookassa_payment_id": payment.yookassa_payment_id,
+                "created_at": (
+                    payment.created_at.isoformat()
+                    if payment.created_at
+                    else None
+                ),
+                "paid_at": (
+                    payment.paid_at.isoformat()
+                    if payment.paid_at
+                    else None
+                ),
+                "access_expires_at": (
+                    access.expires_at.isoformat()
+                    if access
+                    else None
+                )
+            })
+
+        return result
+
+    finally:
+        db.close()
 
 @router.put("/users/{user_id}/service")
 def change_user_service(

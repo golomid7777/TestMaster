@@ -9,7 +9,9 @@ function Admin() {
     const [topics, setTopics] = useState([]);
     const [users, setUsers] = useState([]);
     const [questions, setQuestions] = useState([]);
-
+    const [payments, setPayments] = useState([]);
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+    const [paymentSearch, setPaymentSearch] = useState("");
     const [newServiceName, setNewServiceName] = useState("");
 
     const [serviceId, setServiceId] = useState("");
@@ -36,6 +38,7 @@ function Admin() {
         loadTopics();
         loadUsers();
         loadQuestions();
+        loadPayments();
     }, []);
 
 
@@ -94,6 +97,40 @@ function Admin() {
 
         return true;
     });
+
+    const filteredPayments = payments.filter(payment => {
+
+        if (
+            paymentStatusFilter !== "all" &&
+            payment.status !== paymentStatusFilter
+        ) {
+            return false;
+        }
+
+        const search = paymentSearch
+            .trim()
+            .toLowerCase();
+
+        if (search) {
+
+            const haystack = [
+                payment.user_name,
+                payment.user_email,
+                payment.topic_name,
+                payment.yookassa_payment_id
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+            if (!haystack.includes(search)) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
 
     function authHeaders(json = false) {
 
@@ -220,6 +257,37 @@ function Admin() {
         }
     }
 
+    async function loadPayments() {
+
+        try {
+
+            const response = await fetch(
+                `${API_URL}/admin/payments`,
+                {
+                    headers: authHeaders()
+                }
+            );
+
+            if (!response.ok) {
+                setMessage(
+                    await readError(
+                        response,
+                        "Не удалось загрузить платежи"
+                    )
+                );
+                return;
+            }
+
+            setPayments(
+                await response.json()
+            );
+
+        } catch {
+
+            setMessage("Ошибка соединения с сервером");
+
+        }
+    }
 
     async function loadQuestions() {
 
@@ -993,19 +1061,19 @@ function Admin() {
 
                     <div className="question-list">
                         {questions.length === 0 ? <div className="empty-state">Вопросов пока нет</div> :
-                         filteredQuestions.length === 0 ? <div className="empty-state">По выбранному фильтру вопросов нет</div> :
-                         filteredQuestions.map(question => (
-                            <article className="question-card" key={question.id}>
-                                <div className="question-meta">{question.service_name} <span>→</span> {question.topic_name}</div>
-                                <h3>{question.question}</h3>
-                                <div className="answer-line"><span>Ответ</span><strong>{question.answer}</strong></div>
-                                {question.keywords && <div className="keywords">{question.keywords}</div>}
-                                <div className="row-actions">
-                                    <button className="btn-secondary" type="button" onClick={() => startEditQuestion(question)}>Редактировать</button>
-                                    <button className="btn-danger" type="button" onClick={() => deleteQuestion(question)}>Удалить</button>
-                                </div>
-                            </article>
-                         ))}
+                            filteredQuestions.length === 0 ? <div className="empty-state">По выбранному фильтру вопросов нет</div> :
+                                filteredQuestions.map(question => (
+                                    <article className="question-card" key={question.id}>
+                                        <div className="question-meta">{question.service_name} <span>→</span> {question.topic_name}</div>
+                                        <h3>{question.question}</h3>
+                                        <div className="answer-line"><span>Ответ</span><strong>{question.answer}</strong></div>
+                                        {question.keywords && <div className="keywords">{question.keywords}</div>}
+                                        <div className="row-actions">
+                                            <button className="btn-secondary" type="button" onClick={() => startEditQuestion(question)}>Редактировать</button>
+                                            <button className="btn-danger" type="button" onClick={() => deleteQuestion(question)}>Удалить</button>
+                                        </div>
+                                    </article>
+                                ))}
                     </div>
                 </section>
 
@@ -1036,8 +1104,177 @@ function Admin() {
                         ))}
                     </div>
                 </section>
-            </main>
-        </div>
+
+                <section className="admin-section" id="payments">
+                    <div className="section-heading">
+                        <div>
+                            <span className="section-kicker">Финансы</span>
+                            <h2>Платежи</h2>
+                        </div>
+                        <div className="section-count">
+                            {filteredPayments.length} из {payments.length}
+                        </div>
+                    </div>
+
+                    <div
+                        style={{
+                            display: "flex",
+                            gap: "10px",
+                            flexWrap: "wrap",
+                            marginBottom: "18px",
+                            alignItems: "center"
+                        }}
+                    >
+                        <input
+                            type="text"
+                            placeholder="Поиск по пользователю, теме или ID..."
+                            value={paymentSearch}
+                            onChange={(e) => setPaymentSearch(e.target.value)}
+                            style={{
+                                flex: "1",
+                                minWidth: "260px",
+                                padding: "10px 12px"
+                            }}
+                        />
+
+                        <button
+                            type="button"
+                            onClick={() => setPaymentStatusFilter("all")}
+                            disabled={paymentStatusFilter === "all"}
+                        >
+                            Все ({payments.length})
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setPaymentStatusFilter("succeeded")}
+                            disabled={paymentStatusFilter === "succeeded"}
+                        >
+                            Успешные ({payments.filter(p => p.status === "succeeded").length})
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setPaymentStatusFilter("pending")}
+                            disabled={paymentStatusFilter === "pending"}
+                        >
+                            Ожидают ({payments.filter(p => p.status === "pending").length})
+                        </button>
+                    </div>
+
+                    <div style={{ overflowX: "auto" }}>
+                        <table
+                            style={{
+                                width: "100%",
+                                borderCollapse: "collapse",
+                                minWidth: "1000px"
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>ID</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Пользователь</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Тема</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Сумма</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Статус</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Доступ</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>Дата оплаты</th>
+                                    <th style={{ textAlign: "left", padding: "10px" }}>ЮKassa ID</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {filteredPayments.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan="8"
+                                            style={{
+                                                padding: "20px",
+                                                textAlign: "center",
+                                                color: "#64748b"
+                                            }}
+                                        >
+                                            Платежей пока нет
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredPayments.map(payment => (
+                                        <tr
+                                            key={payment.id}
+                                            style={{
+                                                borderTop: "1px solid #e2e8f0"
+                                            }}
+                                        >
+                                            <td style={{ padding: "10px" }}>
+                                                {payment.id}
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                <div style={{ fontWeight: "700" }}>
+                                                    {payment.user_name}
+                                                </div>
+                                                <div
+                                                    style={{
+                                                        fontSize: "12px",
+                                                        color: "#64748b"
+                                                    }}
+                                                >
+                                                    {payment.user_email}
+                                                </div>
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                {payment.topic_name}
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                {(Number(payment.amount_kopecks || 0) / 100).toFixed(2)} ₽
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                <span
+                                                    style={{
+                                                        fontWeight: "700",
+                                                        color:
+                                                            payment.status === "succeeded"
+                                                                ? "#15803d"
+                                                                : payment.status === "pending"
+                                                                    ? "#b45309"
+                                                                    : "#b91c1c"
+                                                    }}
+                                                >
+                                                    {payment.status}
+                                                </span>
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                {payment.access_minutes} мин.
+                                            </td>
+
+                                            <td style={{ padding: "10px" }}>
+                                                {payment.paid_at
+                                                    ? new Date(payment.paid_at + "Z").toLocaleString("ru-RU")
+                                                    : "—"}
+                                            </td>
+
+                                            <td
+                                                style={{
+                                                    padding: "10px",
+                                                    fontSize: "12px"
+                                                }}
+                                            >
+                                                {payment.yookassa_payment_id || "—"}
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main >
+        </div >
     );
 }
 
