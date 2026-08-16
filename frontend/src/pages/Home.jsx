@@ -156,18 +156,6 @@ function Home() {
             }
         }
 
-        useEffect(() => {
-            if (!paymentReturn) {
-                return;
-            }
-
-            const timer = setTimeout(() => {
-                setPaymentReturn(false);
-            }, 5000);
-
-            return () => clearTimeout(timer);
-        }, [paymentReturn]);
-
 
         const params = new URLSearchParams(window.location.search);
         const returnedFromPayment =
@@ -198,6 +186,17 @@ function Home() {
 
     }, [isAdmin]);
 
+    useEffect(() => {
+        if (!paymentReturn) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            setPaymentReturn(false);
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [paymentReturn]);
 
     useEffect(() => {
 
