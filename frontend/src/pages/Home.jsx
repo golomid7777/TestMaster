@@ -156,6 +156,18 @@ function Home() {
             }
         }
 
+        useEffect(() => {
+            if (!paymentReturn) {
+                return;
+            }
+
+            const timer = setTimeout(() => {
+                setPaymentReturn(false);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+        }, [paymentReturn]);
+
 
         const params = new URLSearchParams(window.location.search);
         const returnedFromPayment =
@@ -573,6 +585,11 @@ function Home() {
 
             </div>
 
+            {paymentReturn && (
+                <div className="payment-success">
+                    ✓ Оплата прошла успешно. Доступ активирован.
+                </div>
+            )}
 
             {
                 isAdmin

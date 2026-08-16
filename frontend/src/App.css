@@ -968,3 +968,14 @@ button, input, select, textarea { font: inherit; }
     padding: 4px 8px;
     border-radius: 7px;
 }
+
+.payment-success {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #ecfdf3;
+    color: #15803d;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid #bbf7d0;
+}
