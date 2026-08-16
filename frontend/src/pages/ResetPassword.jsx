@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = "http://127.0.0.1:8001";
+const API_URL = "/api";
 
 function ResetPassword({ token, onDone }) {
     const [password, setPassword] = useState("");
