@@ -19,6 +19,7 @@ function Home() {
 
     const [timeLeft, setTimeLeft] = useState(0);
     const [timerExpired, setTimerExpired] = useState(false);
+    const [nowTick, setNowTick] = useState(Date.now());
 
     const serviceId = localStorage.getItem("service_id");
     const userId = localStorage.getItem("user_id");
@@ -210,6 +211,51 @@ function Home() {
         return () => clearInterval(interval);
 
     }, [selectedTopicId, topics]);
+
+    async function buyTopic(topic) {
+        try {
+            setError("");
+
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(
+                `${API_URL}/payments/create/${topic.id}`,
+                {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detail || "Не удалось создать платёж"
+                );
+            }
+
+            if (!data.confirmation_url) {
+                throw new Error(
+                    "ЮKassa не вернула ссылку на оплату"
+                );
+            }
+
+            window.location.href = data.confirmation_url;
+
+        } catch (err) {
+            setError(err.message);
+        }
+    }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setNowTick(Date.now());
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     async function chooseTopic(topic) {
 
@@ -556,57 +602,96 @@ function Home() {
                                     >
 
                                         {
-                                            topics.map(topic => (
+                                            topics.map(topic => {
 
-                                                <button
-                                                    key={topic.id}
-                                                    onClick={() =>
-                                                        chooseTopic(topic)
-                                                    }
-                                                    style={{
-                                                        width: "100%",
-                                                        textAlign: "left"
-                                                    }}
-                                                >
+                                                const expiresAt = topic.access_expires_at
+                                                    ? new Date(topic.access_expires_at + "Z").getTime()
+                                                    : null;
 
-                                                    <div>
-                                                        {topic.name}
-                                                    </div>
+                                                const remainingMs = expiresAt
+                                                    ? Math.max(0, expiresAt - nowTick)
+                                                    : 0;
 
-                                                    <div
+                                                const remainingMinutes = Math.floor(
+                                                    remainingMs / 60000
+                                                );
+
+                                                const remainingSeconds = Math.floor(
+                                                    (remainingMs % 60000) / 1000
+                                                );
+
+                                                const remainingLabel =
+                                                    `${String(remainingMinutes).padStart(2, "0")}:` +
+                                                    `${String(remainingSeconds).padStart(2, "0")}`;
+
+                                                const accessIsActive =
+                                                    topic.has_access &&
+                                                    remainingMs > 0;
+
+                                                return (
+                                                    <button
+                                                        key={topic.id}
+                                                        onClick={() => {
+                                                            if (topic.is_paid && !topic.has_access) {
+                                                                buyTopic(topic);
+                                                            } else {
+                                                                chooseTopic(topic);
+                                                            }
+                                                        }}
                                                         style={{
-                                                            fontSize: "13px",
-                                                            opacity: 0.8,
-                                                            marginTop: "4px"
+                                                            width: "100%",
+                                                            textAlign: "left"
                                                         }}
                                                     >
-                                                        <span>
-                                                            {topic.is_paid
-                                                                ? `${(Number(topic.price_kopecks || 0) / 100).toFixed(
-                                                                    Number(topic.price_kopecks || 0) % 100 === 0 ? 0 : 2
-                                                                )} ₽ · доступ ${topic.access_minutes} мин.`
-                                                                : "Бесплатно · без ограничения времени"
-                                                            }
-                                                        </span>
 
-                                                        <span
+                                                        <div>
+                                                            {topic.name}
+                                                        </div>
+
+                                                        <div
                                                             style={{
-                                                                display: "inline-block",
-                                                                marginLeft: "10px",
-                                                                padding: "3px 8px",
-                                                                borderRadius: "6px",
-                                                                background: "#ecfdf3",
-                                                                color: "#15803d",
-                                                                fontWeight: "700"
+                                                                fontSize: "13px",
+                                                                opacity: 0.8,
+                                                                marginTop: "4px"
                                                             }}
                                                         >
-                                                            Ответов: {topic.question_count ?? 0}
-                                                        </span>
-                                                    </div>
+                                                            <span
+                                                                className={
+                                                                    topic.is_paid
+                                                                        ? accessIsActive
+                                                                            ? "topic-access topic-access--active"
+                                                                            : "topic-access topic-access--expired"
+                                                                        : ""
+                                                                }
+                                                            >
+                                                                {topic.is_paid
+                                                                    ? accessIsActive
+                                                                        ? `Доступ активен · ${remainingLabel}`
+                                                                        : `Доступ истёк · ${(Number(topic.price_kopecks || 0) / 100).toFixed(
+                                                                            Number(topic.price_kopecks || 0) % 100 === 0 ? 0 : 2
+                                                                        )} ₽ · Купить доступ на ${topic.access_minutes} мин.`
+                                                                    : "Бесплатно · без ограничения времени"
+                                                                }
+                                                            </span>
 
-                                                </button>
+                                                            <span
+                                                                style={{
+                                                                    display: "inline-block",
+                                                                    marginLeft: "10px",
+                                                                    padding: "3px 8px",
+                                                                    borderRadius: "6px",
+                                                                    background: "#ecfdf3",
+                                                                    color: "#15803d",
+                                                                    fontWeight: "700"
+                                                                }}
+                                                            >
+                                                                Ответов: {topic.question_count ?? 0}
+                                                            </span>
+                                                        </div>
 
-                                            ))
+                                                    </button>
+                                                );
+                                            })
                                         }
 
                                     </div>

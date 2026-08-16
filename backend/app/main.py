@@ -1,11 +1,15 @@
 ﻿from fastapi import FastAPI
+from pathlib import Path
+from dotenv import load_dotenv
 
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_PATH)
 from services.router import router as services_router
 from questions.router import router as questions_router
 from users.router import router as users_router
 from fastapi.middleware.cors import CORSMiddleware
 from admin.router import router as admin_router
-
+from payments.router import router as payments_router
 
 app = FastAPI(
     title="TestMaster API"
@@ -37,6 +41,7 @@ app.include_router(
     users_router
 )
 
+app.include_router(payments_router)
 
 @app.get("/")
 def home():

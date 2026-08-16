@@ -213,6 +213,78 @@ class TestSession(Base):
         nullable=False
     )
 
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
+
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True
+    )
+
+    topic_id = Column(
+        Integer,
+        ForeignKey("topics.id"),
+        nullable=False,
+        index=True
+    )
+
+    # ID платежа, который вернёт ЮKassa.
+    yookassa_payment_id = Column(
+        String,
+        unique=True,
+        nullable=True,
+        index=True
+    )
+
+    # Наш ключ идемпотентности для безопасного создания платежа.
+    idempotency_key = Column(
+        String,
+        unique=True,
+        nullable=False,
+        index=True
+    )
+
+    # Цена фиксируется в момент создания платежа.
+    # Даже если администратор позже изменит цену темы,
+    # этот платёж останется по старой цене.
+    amount_kopecks = Column(
+        Integer,
+        nullable=False
+    )
+
+    # Аналогично фиксируем длительность доступа,
+    # которая действовала в момент покупки.
+    access_minutes = Column(
+        Integer,
+        nullable=False
+    )
+
+    # pending / succeeded / canceled
+    status = Column(
+        String,
+        nullable=False,
+        default="pending",
+        index=True
+    )
+
+    created_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow
+    )
+
+    paid_at = Column(
+        DateTime,
+        nullable=True
+    )
 
 class TopicAccess(Base):
     __tablename__ = "topic_accesses"
