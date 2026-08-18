@@ -1,3 +1,85 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{font-family:Inter,Arial,sans-serif;color:#0f172a;background:#f5f7fb;font-synthesis:none;text-rendering:optimizeLegibility;--primary:#2563eb;--primary-hover:#1d4ed8;--navy:#102b4e;--text:#0f172a;--muted:#64748b;--border:#dde5ef;--surface:#fff;--soft:#f7f9fc;--danger:#dc2626;--success:#15803d;--shadow:0 12px 35px rgba(15,39,71,.07)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}html,body,#root{min-height:100%}body{margin:0;min-width:320px;background:#f5f7fb;color:var(--text)}button,input,select,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}
+
+.push-notification-block {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.push-enable-button {
+    width: 100%;
+    max-width: 360px;
+    min-height: 52px;
+
+    border: none;
+    border-radius: 12px;
+
+    background: linear-gradient(
+        135deg,
+        #2f80ed 0%,
+        #155eef 100%
+    );
+
+    color: white;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 18px rgba(37, 99, 235, 0.22);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
+}
+
+.push-enable-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 11px 26px rgba(37, 99, 235, 0.32);
+
+    filter: brightness(1.06);
+}
+
+.push-enable-button:active {
+    transform: translateY(0);
+}
+
+.push-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.push-status--success {
+    color: #16a34a;
+}
+
+.push-success-icon {
+    width: 22px;
+    height: 22px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #16a34a;
+    color: white;
+
+    font-size: 14px;
+    font-weight: 800;
+}

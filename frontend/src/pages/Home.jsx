@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getServices } from "../api/client";
+import { subscribeToPush } from "../push";
 
 const API_URL = "/api";
 
@@ -24,6 +25,9 @@ function Home() {
     const serviceId = localStorage.getItem("service_id");
     const userId = localStorage.getItem("user_id");
 
+    const [pushStatus, setPushStatus] = useState("");
+    const [screenProtected, setScreenProtected] = useState(false);
+
     const isAdmin =
         localStorage.getItem("is_admin") === "true";
 
@@ -37,6 +41,7 @@ function Home() {
 
         const minutes = Math.floor(seconds / 60);
         const secs = seconds % 60;
+
 
         return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
@@ -176,6 +181,7 @@ function Home() {
                 "",
                 window.location.pathname
             );
+
 
             return () => {
                 clearTimeout(retry1);
@@ -556,9 +562,151 @@ function Home() {
     }
 
 
+    useEffect(() => {
+        const testIsOpen =
+            Boolean(selectedTopicId) &&
+            !timerExpired &&
+            !isAdmin;
+
+        if (!testIsOpen) {
+            setScreenProtected(false);
+            return;
+        }
+
+        const blockEvent = (event) => {
+            event.preventDefault();
+        };
+
+        const blockCopyShortcut = (event) => {
+            const key = event.key.toLowerCase();
+
+            if (
+                (event.ctrlKey || event.metaKey) &&
+                ["c", "x", "a", "p", "s"].includes(key)
+            ) {
+                event.preventDefault();
+            }
+
+            if (event.key === "PrintScreen") {
+                event.preventDefault();
+                setScreenProtected(true);
+            }
+        };
+
+        const handleVisibility = () => {
+            if (document.hidden) {
+                setScreenProtected(true);
+                setAnswer("");
+                setSelectedQuestion("");
+                setQuestions([]);
+            }
+        };
+
+        const handleBlur = () => {
+            setScreenProtected(true);
+            setAnswer("");
+            setSelectedQuestion("");
+            setQuestions([]);
+        };
+
+        document.addEventListener("copy", blockEvent);
+        document.addEventListener("cut", blockEvent);
+        document.addEventListener("contextmenu", blockEvent);
+        document.addEventListener("selectstart", blockEvent);
+        document.addEventListener("keydown", blockCopyShortcut);
+        document.addEventListener("visibilitychange", handleVisibility);
+        window.addEventListener("blur", handleBlur);
+
+        return () => {
+            document.removeEventListener("copy", blockEvent);
+            document.removeEventListener("cut", blockEvent);
+            document.removeEventListener("contextmenu", blockEvent);
+            document.removeEventListener("selectstart", blockEvent);
+            document.removeEventListener("keydown", blockCopyShortcut);
+            document.removeEventListener("visibilitychange", handleVisibility);
+            window.removeEventListener("blur", handleBlur);
+        };
+    }, [selectedTopicId, timerExpired, isAdmin]);
+
+
+    async function enablePush() {
+        try {
+            setPushStatus("Подключаем уведомления...");
+
+            await subscribeToPush();
+
+            setPushStatus("Уведомления включены");
+        } catch (err) {
+            setPushStatus(
+                err.message || "Не удалось включить уведомления"
+            );
+        }
+    }
+
     return (
 
-        <div className="container">
+        <div
+            className={`container ${selectedTopicId && !isAdmin ? "test-protected" : ""}`}
+            onDragStart={(e) => {
+                if (selectedTopicId && !isAdmin) {
+                    e.preventDefault();
+                }
+            }}
+        >
+
+            {screenProtected && selectedTopicId && !isAdmin && (
+                <div
+                    style={{
+                        position: "fixed",
+                        inset: 0,
+                        zIndex: 99999,
+                        background: "#ffffff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "24px"
+                    }}
+                >
+                    <div
+                        style={{
+                            width: "100%",
+                            maxWidth: "440px",
+                            textAlign: "center",
+                            padding: "28px",
+                            border: "1px solid #dbe3ea",
+                            borderRadius: "18px",
+                            boxShadow: "0 18px 50px rgba(15, 23, 42, 0.12)"
+                        }}
+                    >
+                        <div
+                            style={{
+                                fontSize: "22px",
+                                fontWeight: "800",
+                                marginBottom: "10px"
+                            }}
+                        >
+                            Защищённый режим
+                        </div>
+
+                        <div
+                            style={{
+                                color: "#64748b",
+                                lineHeight: "1.5",
+                                marginBottom: "20px"
+                            }}
+                        >
+                            Содержимое теста скрыто после переключения окна или вкладки.
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setScreenProtected(false)}
+                        >
+                            Продолжить тест
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div
                 style={{
@@ -581,6 +729,38 @@ function Home() {
                         {serviceName}
                     </span>
                 </div>
+
+                {!isAdmin && (
+                    <div className="push-notification-block">
+
+                        <button
+                            type="button"
+                            className="push-enable-button"
+                            onClick={enablePush}
+                        >
+                            Включить уведомления
+                        </button>
+
+                        {pushStatus && (
+                            <div
+                                className={
+                                    pushStatus === "Уведомления включены"
+                                        ? "push-status push-status--success"
+                                        : "push-status"
+                                }
+                            >
+                                {pushStatus === "Уведомления включены" && (
+                                    <span className="push-success-icon">
+                                        ✓
+                                    </span>
+                                )}
+
+                                {pushStatus}
+                            </div>
+                        )}
+
+                    </div>
+                )}
 
             </div>
 

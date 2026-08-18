@@ -10,6 +10,7 @@ from users.router import router as users_router
 from fastapi.middleware.cors import CORSMiddleware
 from admin.router import router as admin_router
 from payments.router import router as payments_router
+from push.router import router as push_router
 
 app = FastAPI(
     title="TestMaster API"
@@ -42,6 +43,7 @@ app.include_router(
 )
 
 app.include_router(payments_router)
+app.include_router(push_router)
 
 @app.get("/")
 def home():

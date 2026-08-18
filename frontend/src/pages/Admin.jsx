@@ -13,6 +13,7 @@ function Admin() {
     const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
     const [paymentSearch, setPaymentSearch] = useState("");
     const [newServiceName, setNewServiceName] = useState("");
+    const [activeSection, setActiveSection] = useState("overview");
 
     const [serviceId, setServiceId] = useState("");
     const [topicName, setTopicName] = useState("");
@@ -404,6 +405,7 @@ function Admin() {
 
     function startEditTopic(topic) {
 
+        setActiveSection("topics");
         setEditingTopicId(topic.id);
         setServiceId(String(topic.service_id));
         setTopicName(topic.name);
@@ -489,12 +491,14 @@ function Admin() {
             setMessage(
                 await readError(
                     response,
-                    "Не удалось добавить тему"
+                    "Не удалось сохранить тему"
                 )
             );
 
             return;
         }
+
+        const wasEditing = Boolean(editingTopicId);
 
         setTopicName("");
         setTopicPriceRubles(0);
@@ -502,14 +506,85 @@ function Admin() {
         setEditingTopicId(null);
 
         setMessage(
-            editingTopicId
+            wasEditing
                 ? "Тема обновлена"
                 : "Тема добавлена"
         );
 
         await loadTopics();
+
+        if (!wasEditing) {
+            const service = services.find(
+                item => Number(item.id) === Number(serviceId)
+            );
+
+            const newTopic = {
+                name: name,
+                service_id: Number(serviceId),
+                service_name: service?.name || "выбранной службы"
+            };
+
+            const confirmed = window.confirm(
+                `Тема "${name}" добавлена.\n\nОтправить PUSH пользователям службы "${newTopic.service_name}"?`
+            );
+
+            if (confirmed) {
+                await sendTopicPush(newTopic, false);
+            }
+        }
     }
 
+    async function sendTopicPush(topic, askConfirm = true) {
+        if (askConfirm) {
+            const confirmed = window.confirm(
+                `Отправить пользователям службы "${topic.service_name}" уведомление о теме "${topic.name}"?`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+        }
+
+        try {
+            setMessage("Отправляем PUSH...");
+
+            const response = await fetch(
+                `${API_URL}/push/notify-service/${topic.service_id}`,
+                {
+                    method: "POST",
+                    headers: authHeaders(true),
+                    body: JSON.stringify({
+                        title: "Новая тема в TestMaster",
+                        body: `Добавлена новая тема: ${topic.name}`,
+                        url: "/"
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                setMessage(
+                    await readError(
+                        response,
+                        "Не удалось отправить PUSH"
+                    )
+                );
+                return;
+            }
+
+            const result = await response.json();
+
+            setMessage(
+                `PUSH отправлен: ${result.sent}, ошибок: ${result.failed}`
+            );
+
+        } catch (error) {
+            console.error("Push error:", error);
+
+            setMessage(
+                "Ошибка соединения при отправке PUSH"
+            );
+        }
+    }
 
     async function deleteTopic(topic) {
 
@@ -549,6 +624,7 @@ function Admin() {
 
     function startEditQuestion(question) {
 
+        setActiveSection("questions");
         setEditingQuestionId(question.id);
 
         setQuestionServiceId(
@@ -874,24 +950,59 @@ function Admin() {
                 </div>
 
                 <nav className="admin-nav">
-                    <a href="#overview">Сводка</a>
-                    <a href="#services">Службы</a>
-                    <a href="#topics">Темы</a>
-                    <a href="#questions">Вопросы</a>
-                    <a href="#users">Пользователи</a>
+                    {[
+                        ["overview", "Сводка"],
+                        ["services", "Службы"],
+                        ["topics", "Темы"],
+                        ["questions", "Вопросы"],
+                        ["users", "Пользователи"],
+                        ["payments", "Платежи"]
+                    ].map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            className={activeSection === key ? "active" : ""}
+                            onClick={() => {
+                                setActiveSection(key);
+                                setMessage("");
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                        >
+                            {label}
+                        </button>
+                    ))}
                 </nav>
             </aside>
 
             <main className="admin-workspace">
-                <header className="admin-topbar" id="overview">
+                <header className="admin-topbar">
                     <div>
                         <div className="eyebrow admin-eyebrow">Управление системой</div>
-                        <h1>Админ-панель</h1>
-                        <p>Управляйте структурой TestMaster и базой вопросов.</p>
+                        <h1>
+                            {{
+                                overview: "Админ-панель",
+                                services: "Службы",
+                                topics: "Темы",
+                                questions: "Вопросы",
+                                users: "Пользователи",
+                                payments: "Платежи"
+                            }[activeSection]}
+                        </h1>
+                        <p>
+                            {{
+                                overview: "Сводная информация по TestMaster.",
+                                services: "Управление службами пользователей.",
+                                topics: "Настройка тем, стоимости, доступа и PUSH-уведомлений.",
+                                questions: "Управление базой вопросов, ответов и Excel.",
+                                users: "Управление пользователями и их службами.",
+                                payments: "История и состояние платежей."
+                            }[activeSection]}
+                        </p>
                     </div>
                     <div className="admin-badge">Администратор</div>
                 </header>
 
+                {activeSection === "overview" && (
                 <section className="stats-grid">
                     <div className="stat-card">
                         <span>Службы</span>
@@ -910,9 +1021,11 @@ function Admin() {
                         <strong>{users.length}</strong>
                     </div>
                 </section>
+                )}
 
                 {message && <div className="admin-message">{message}</div>}
 
+                {activeSection === "services" && (
                 <section className="admin-section" id="services">
                     <div className="section-heading">
                         <div><span className="section-kicker">Структура</span><h2>Службы</h2></div>
@@ -930,7 +1043,9 @@ function Admin() {
                         ))}
                     </div>
                 </section>
+                )}
 
+                {activeSection === "topics" && (
                 <section className="admin-section" id="topics">
                     <div className="section-heading">
                         <div><span className="section-kicker">Настройка тестов</span><h2>Темы</h2></div>
@@ -987,14 +1102,39 @@ function Admin() {
                                     </span>
                                 </div>
                                 <div className="row-actions">
-                                    <button className="btn-secondary" type="button" onClick={() => startEditTopic(topic)}>Редактировать</button>
-                                    <button className="btn-danger" type="button" onClick={() => deleteTopic(topic)}>Удалить</button>
+
+                                    <button
+                                        className="btn-secondary"
+                                        type="button"
+                                        onClick={() => sendTopicPush(topic)}
+                                    >
+                                        Отправить PUSH
+                                    </button>
+
+                                    <button
+                                        className="btn-secondary"
+                                        type="button"
+                                        onClick={() => startEditTopic(topic)}
+                                    >
+                                        Редактировать
+                                    </button>
+
+                                    <button
+                                        className="btn-danger"
+                                        type="button"
+                                        onClick={() => deleteTopic(topic)}
+                                    >
+                                        Удалить
+                                    </button>
+
                                 </div>
                             </div>
                         ))}
                     </div>
                 </section>
+                )}
 
+                {activeSection === "questions" && (
                 <section className="admin-section" id="questions">
                     <div className="section-heading">
                         <div><span className="section-kicker">База знаний</span><h2>Вопросы</h2></div>
@@ -1076,7 +1216,9 @@ function Admin() {
                                 ))}
                     </div>
                 </section>
+                )}
 
+                {activeSection === "users" && (
                 <section className="admin-section" id="users">
                     <div className="section-heading">
                         <div><span className="section-kicker">Доступ</span><h2>Пользователи</h2></div>
@@ -1104,7 +1246,9 @@ function Admin() {
                         ))}
                     </div>
                 </section>
+                )}
 
+                {activeSection === "payments" && (
                 <section className="admin-section" id="payments">
                     <div className="section-heading">
                         <div>
@@ -1272,6 +1416,7 @@ function Admin() {
                         </table>
                     </div>
                 </section>
+                )}
 
             </main >
         </div >
