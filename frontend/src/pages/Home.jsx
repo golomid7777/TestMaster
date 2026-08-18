@@ -5,6 +5,86 @@ import { subscribeToPush } from "../push";
 const API_URL = "/api";
 
 
+
+function TopicIcon({ name }) {
+    const normalized = (name || "").toLowerCase();
+
+    const commonProps = {
+        viewBox: "0 0 48 48",
+        width: 46,
+        height: 46,
+        fill: "none",
+        xmlns: "http://www.w3.org/2000/svg",
+        "aria-hidden": "true"
+    };
+
+    if (normalized.includes("гостеприим")) {
+        return (
+            <svg {...commonProps} className="topic-icon-svg topic-icon-svg--hospitality">
+                <path d="M12 33h24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                <path d="M15 30c0-8 4-14 9-14s9 6 9 14H15Z" fill="currentColor" opacity=".9" />
+                <path d="M24 12v4" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+                <circle cx="24" cy="10" r="2.2" fill="currentColor" />
+                <path d="M10 36h28" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+        );
+    }
+
+    if (normalized === "озп" || normalized.includes("озп")) {
+        return (
+            <svg {...commonProps} className="topic-icon-svg topic-icon-svg--security">
+                <path d="M24 8 34 12v8c0 8-4.8 14-10 18-5.2-4-10-10-10-18v-8L24 8Z" fill="currentColor" opacity=".95" />
+                <path d="M14 16 7 14l4 6 5 2M34 16l7-2-4 6-5 2" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="m24 15.5 2.1 4.3 4.7.7-3.4 3.3.8 4.7-4.2-2.2-4.2 2.2.8-4.7-3.4-3.3 4.7-.7 2.1-4.3Z" fill="#fff" />
+            </svg>
+        );
+    }
+
+    if (normalized.includes("сиз")) {
+        return (
+            <svg {...commonProps} className="topic-icon-svg topic-icon-svg--ppe">
+                <path d="M7 11c6-1 11 1 17 5v23c-6-4-11-6-17-5V11Z" fill="currentColor" opacity=".16" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+                <path d="M41 11c-6-1-11 1-17 5v23c6-4 11-6 17-5V11Z" fill="currentColor" opacity=".12" stroke="currentColor" strokeWidth="2.2" strokeLinejoin="round" />
+                <path d="M31 18 36 20v5c0 4-2.2 7-5 9-2.8-2-5-5-5-9v-5l5-2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.8" />
+                <path d="m28.5 25 1.8 1.8 3.6-4" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        );
+    }
+
+    if (normalized.includes("опасн")) {
+        return (
+            <svg {...commonProps} className="topic-icon-svg topic-icon-svg--danger">
+                <path d="M24 5 43 24 24 43 5 24 24 5Z" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+                <path d="M24 13c2.5 5-1 6.5 1.5 10 1.7 2.4 4.8 3.5 4.8 7.3 0 4.2-2.8 7-6.3 7s-6.3-2.8-6.3-7c0-3.6 2.4-5.8 4.4-8.3.9 2.6 2.1 3.6 3.1 4.2-.3-4.5-3.1-6.9-1.2-13.2Z" fill="currentColor" />
+            </svg>
+        );
+    }
+
+    if (normalized.includes("живот")) {
+        return (
+            <svg {...commonProps} className="topic-icon-svg topic-icon-svg--animals">
+                <path d="M29 9h9l5 3.2-4.5 2.1H31l-5.5 4.4h-3l3.2-5.4-3.2-4.8h3l3.5.5Z" fill="#169bd5" />
+                <path d="M8.5 34c0-5.6 3.3-9.7 7.6-9.7s7.6 4.1 7.6 9.7v4H8.5v-4Z" fill="#3f6fa4" />
+                <circle cx="16.1" cy="20.7" r="4.3" fill="#3f6fa4" />
+                <path d="m12.8 18.2-2.2-3.5M19.4 18.2l2.2-3.5" stroke="#3f6fa4" strokeWidth="2.2" strokeLinecap="round" />
+                <path d="M25 35c0-4.3 2.7-7.3 6.1-7.3s6.1 3 6.1 7.3v3H25v-3Z" fill="#f2a516" />
+                <circle cx="31.1" cy="24.5" r="3.4" fill="#f2a516" />
+                <path d="m28.5 22.2-1.3-3.3M33.7 22.2l1.3-3.3" stroke="#f2a516" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+        );
+    }
+
+    return (
+        <svg {...commonProps} className="topic-icon-svg topic-icon-svg--airport">
+            <path d="M8 37h14M11 37V20h9v17M13 20l2-8h3l2 8M14 25h5M14 30h5" stroke="#2774b8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M26 13h11l5 3-5 2h-8l-5 4h-3l3-5-3-5h3l2 1Z" fill="#169bd5" />
+            <path d="M27 37h13V27H27v10Z" fill="#78b8d8" stroke="#2774b8" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M24 37h19" stroke="#2774b8" strokeWidth="2.2" strokeLinecap="round" />
+            <circle cx="16.5" cy="10" r="1.5" fill="#f5a623" />
+        </svg>
+    );
+}
+
 function Home() {
 
     const [text, setText] = useState("");
@@ -708,61 +788,71 @@ function Home() {
                 </div>
             )}
 
-            <div
-                style={{
-                    textAlign: "center",
-                    marginBottom: "24px"
-                }}
-            >
+            <section className="home-hero">
+                <div className="home-hero__photo" aria-hidden="true" />
 
-                <h1>
-                    TestMaster
-                </h1>
+                <div className="home-hero__content">
+                    <div className="home-hero__brand">TestMaster</div>
 
+                    <div className="home-hero__subtitle">
+                        Быстрый поиск правильных ответов
+                    </div>
 
-                <div className="user-service">
-                    <span className="user-service-label">
-                        Ваша служба
-                    </span>
-
-                    <span className="user-service-name">
-                        {serviceName}
-                    </span>
+                    <div className="home-hero__service">
+                        <span>Ваша служба</span>
+                        <strong>{serviceName}</strong>
+                    </div>
                 </div>
 
-                {!isAdmin && (
-                    <div className="push-notification-block">
-
-                        <button
-                            type="button"
-                            className="push-enable-button"
-                            onClick={enablePush}
-                        >
-                            Включить уведомления
-                        </button>
-
-                        {pushStatus && (
-                            <div
-                                className={
-                                    pushStatus === "Уведомления включены"
-                                        ? "push-status push-status--success"
-                                        : "push-status"
-                                }
-                            >
-                                {pushStatus === "Уведомления включены" && (
-                                    <span className="push-success-icon">
-                                        ✓
-                                    </span>
-                                )}
-
-                                {pushStatus}
-                            </div>
-                        )}
-
+                <div className="home-hero__features">
+                    <div className="home-hero__feature">
+                        <span className="home-hero__feature-icon">⚡</span>
+                        <span><strong>Мгновенный поиск</strong><small>по ключевым словам</small></span>
                     </div>
-                )}
+                    <div className="home-hero__feature">
+                        <span className="home-hero__feature-icon">◎</span>
+                        <span><strong>Точные ответы</strong><small>только по теме</small></span>
+                    </div>
+                    <div className="home-hero__feature">
+                        <span className="home-hero__feature-icon">✓</span>
+                        <span><strong>Актуальные данные</strong><small>обновляются регулярно</small></span>
+                    </div>
+                    <div className="home-hero__feature">
+                        <span className="home-hero__feature-icon">◷</span>
+                        <span><strong>Экономия времени</strong><small>готовьтесь эффективнее</small></span>
+                    </div>
+                </div>
+            </section>
 
-            </div>
+            {!isAdmin && (
+                <div className="push-notification-block">
+                    <button
+                        type="button"
+                        className="push-enable-button"
+                        onClick={enablePush}
+                    >
+                        <span className="push-enable-button__bell" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"
+                                    stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M10 21h4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+                            </svg>
+                        </span>
+                        <span>Включить уведомления</span>
+                    </button>
+
+                    {pushStatus && (
+                        <div className={pushStatus === "Уведомления включены"
+                            ? "push-status push-status--success"
+                            : "push-status"}>
+                            {pushStatus === "Уведомления включены" && (
+                                <span className="push-success-icon">✓</span>
+                            )}
+                            {pushStatus}
+                        </div>
+                    )}
+                </div>
+            )}
 
             {paymentReturn && (
                 <div className="payment-success">
@@ -849,74 +939,126 @@ function Home() {
                                                     topic.has_access &&
                                                     remainingMs > 0;
 
+                                                const priceRubles =
+                                                    Number(topic.price_kopecks || 0) / 100;
+
+                                                const priceLabel =
+                                                    priceRubles.toFixed(
+                                                        Number(topic.price_kopecks || 0) % 100 === 0 ? 0 : 2
+                                                    );
+
+                                                const openTopic = () => {
+                                                    if (topic.is_paid && !topic.has_access) {
+                                                        buyTopic(topic);
+                                                    } else {
+                                                        chooseTopic(topic);
+                                                    }
+                                                };
+
                                                 return (
-                                                    <button
+                                                    <article
+                                                        className={`topic-card ${accessIsActive ? "topic-card--active" : ""}`}
                                                         key={topic.id}
-                                                        onClick={() => {
-                                                            if (topic.is_paid && !topic.has_access) {
-                                                                buyTopic(topic);
-                                                            } else {
-                                                                chooseTopic(topic);
-                                                            }
-                                                        }}
-                                                        style={{
-                                                            width: "100%",
-                                                            textAlign: "left"
-                                                        }}
                                                     >
-
-                                                        <div>
-                                                            {topic.name}
-                                                        </div>
-
                                                         <div
-                                                            style={{
-                                                                fontSize: "13px",
-                                                                opacity: 0.8,
-                                                                marginTop: "4px"
-                                                            }}
+                                                            className={`topic-card__icon ${
+                                                                (topic.name || "").toLowerCase().includes("гостеприим")
+                                                                    ? "topic-card__icon--hospitality"
+                                                                    : (topic.name || "").toLowerCase().includes("озп")
+                                                                        ? "topic-card__icon--security"
+                                                                        : (topic.name || "").toLowerCase().includes("сиз")
+                                                                            ? "topic-card__icon--ppe"
+                                                                            : (topic.name || "").toLowerCase().includes("опасн")
+                                                                                ? "topic-card__icon--danger"
+                                                                                : (topic.name || "").toLowerCase().includes("живот")
+                                                                                    ? "topic-card__icon--animals"
+                                                                                    : "topic-card__icon--airport"
+                                                            }`}
                                                         >
-                                                            <span
-                                                                className={
-                                                                    topic.is_paid
-                                                                        ? accessIsActive
-                                                                            ? "topic-access topic-access--active"
-                                                                            : "topic-access topic-access--expired"
-                                                                        : ""
-                                                                }
-                                                            >
-                                                                {topic.is_paid
-                                                                    ? accessIsActive
-                                                                        ? `Доступ активен · ${remainingLabel}`
-                                                                        : `Доступ истёк · ${(Number(topic.price_kopecks || 0) / 100).toFixed(
-                                                                            Number(topic.price_kopecks || 0) % 100 === 0 ? 0 : 2
-                                                                        )} ₽ · Купить доступ на ${topic.access_minutes} мин.`
-                                                                    : "Бесплатно · без ограничения времени"
-                                                                }
-                                                            </span>
-
-                                                            <span
-                                                                style={{
-                                                                    display: "inline-block",
-                                                                    marginLeft: "10px",
-                                                                    padding: "3px 8px",
-                                                                    borderRadius: "6px",
-                                                                    background: "#ecfdf3",
-                                                                    color: "#15803d",
-                                                                    fontWeight: "700"
-                                                                }}
-                                                            >
-                                                                Ответов: {topic.question_count ?? 0}
-                                                            </span>
+                                                            <TopicIcon name={topic.name} />
                                                         </div>
 
-                                                    </button>
+                                                        <div className="topic-card__content">
+                                                            <div className="topic-card__title">
+                                                                {topic.name}
+                                                            </div>
+
+                                                            <div className="topic-card__meta">
+                                                                <span
+                                                                    className={
+                                                                        topic.is_paid
+                                                                            ? accessIsActive
+                                                                                ? "topic-access topic-access--active"
+                                                                                : "topic-access topic-access--idle"
+                                                                            : "topic-access topic-access--free"
+                                                                    }
+                                                                >
+                                                                    {topic.is_paid
+                                                                        ? accessIsActive
+                                                                            ? `Доступ активен · ${remainingLabel}`
+                                                                            : `Не активировано · ${priceLabel} ₽ · ${topic.access_minutes} мин.`
+                                                                        : "Бесплатно · без ограничения времени"
+                                                                    }
+                                                                </span>
+
+                                                                <span className="topic-answer-count">
+                                                                    Ответов: {topic.question_count ?? 0}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="topic-card__action">
+                                                            {topic.is_paid && accessIsActive ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className="topic-start-button topic-start-button--active"
+                                                                    onClick={openTopic}
+                                                                >
+                                                                    Продолжить тест
+                                                                </button>
+                                                            ) : topic.is_paid ? (
+                                                                <button
+                                                                    type="button"
+                                                                    className="topic-start-button"
+                                                                    onClick={openTopic}
+                                                                >
+                                                                    Купить доступ
+                                                                </button>
+                                                            ) : (
+                                                                <button
+                                                                    type="button"
+                                                                    className="topic-start-button"
+                                                                    onClick={openTopic}
+                                                                >
+                                                                    Начать тест
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </article>
                                                 );
                                             })
                                         }
 
                                     </div>
                             }
+
+                            <div className="topics-info-panel">
+                                <div className="topics-info-panel__content">
+                                    <div className="topics-info-panel__icon">i</div>
+                                    <div>
+                                        <strong>Важно знать</strong>
+                                        <p>
+                                            Время доступа к платным темам начинает отсчитываться
+                                            после активации теста.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div
+                                    className="airport-photo"
+                                    aria-hidden="true"
+                                />
+                            </div>
 
                         </>
 
